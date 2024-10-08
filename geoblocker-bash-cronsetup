@@ -149,7 +149,10 @@ remove_cron_job() {
 		debugprint "Removing $job_type cron job for ${suite_name}... "
 		# read crontab -> filter out jobs by the comment ($suite_name-$job_type) -> write resulting lines back to crontab
 		set -o pipefail
-		crontab -u root -l 2>/dev/null | grep -v "${suite_name}-${job_type}" | crontab -u root -; rv=$?
+                ctabs=$(crontab -u root -l 2>/dev/null)
+                if [ -n "$ctabs" ] && [ $? -eq 0]; then
+                        echo -e "$ctabs" | grep -v "${suite_name}-${job_type}" | crontab -u root -; rv=$?
+                fi
 		set +o pipefail
 
 		if [[ $rv -ne 0 ]]; then
